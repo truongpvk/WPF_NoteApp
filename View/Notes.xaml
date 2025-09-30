@@ -1,0 +1,364 @@
+﻿<Window x:Class="DoAnNote.Notes"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:local="clr-namespace:DoAnNote"
+        mc:Ignorable="d"
+        Title="Notes" Height="680" Width="1200"
+        Background="{DynamicResource WindowBg}" Foreground="{DynamicResource TextMain}">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="WindowBg" Color="#FFFFFFFF"/>
+        <SolidColorBrush x:Key="SidebarBg" Color="#FFF5F5F5"/>
+        <SolidColorBrush x:Key="TextMain" Color="#222222"/>
+        <SolidColorBrush x:Key="TextSub"  Color="#666666"/>
+        <SolidColorBrush x:Key="CardShadow" Color="#15000000"/>
+        <SolidColorBrush x:Key="FieldBg" Color="#FFFFFFFF"/>
+        <SolidColorBrush x:Key="FieldBorder" Color="#E0E0E0"/>
+        <SolidColorBrush x:Key="CardTextMain" Color="#1F2937"/>
+        <!-- đậm, gần đen -->
+        <SolidColorBrush x:Key="CardTextSub"  Color="#475569"/>
+        <!-- xám đậm -->
+
+        <!-- thẻ -->
+        <DataTemplate x:Key="NoteCardTemplate">
+            <Border x:Name="CardRoot"
+                    MouseLeftButtonDown="CardRoot_MouseLeftButtonDown"
+                    MouseLeftButtonUp="CardRoot_MouseLeftButtonUp"
+                    AllowDrop="False"
+                    MouseMove="CardRoot_MouseMove"
+                    CornerRadius="12"
+                    Padding="18"
+                    Margin="0,0,24,24"
+                    Width="220" Height="160"
+                    Background="{Binding Background}"
+                    Cursor="Hand">
+                <StackPanel>
+                    <!-- Tiêu đề: dùng TitlePreview -->
+                    <TextBlock Text="{Binding TitlePreview}"
+                 FontSize="16"
+                 FontWeight="SemiBold"
+                 Margin="0,0,0,8"
+                 Foreground="{DynamicResource CardTextMain}"
+                 TextWrapping="NoWrap"
+                 TextTrimming="CharacterEllipsis"/>
+
+                    <!-- Nội dung: dùng PreviewContent -->
+                    <TextBlock Text="{Binding PreviewContent}"
+                 Foreground="{DynamicResource CardTextMain}"
+                 TextWrapping="NoWrap"
+                 TextTrimming="CharacterEllipsis"/>
+
+                    <!-- Ngày -->
+                    <TextBlock Text="{Binding DateString}"
+                 Margin="0,12,0,0"
+                 Foreground="{DynamicResource CardTextSub}"
+                 FontSize="12"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="84"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Column="0" Background="{DynamicResource SidebarBg}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Image x:Name="IconLogo" Grid.Row="0" Margin="20,18,20,18" Height="28" Source="/assets/TrangChinh/Light/Logo_light.png"/>
+
+            <Grid Grid.Row="1" Margin="0,12,0,0" VerticalAlignment="Top">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- HOME -->
+                <Grid Grid.Row="0" Margin="0,20" >
+                    <Image x:Name="IconHome" Height="22" Cursor="Hand"
+                            Source="/assets/TrangChinh/Light/home_light.png"
+                            MouseLeftButtonDown="SelHome_MouseLeftButtonDown"/>
+                    <Rectangle x:Name="SelHome" Width="5" Height="22" Fill="#111"
+                                HorizontalAlignment="Left" VerticalAlignment="Center"
+                                RadiusX="1.5" RadiusY="1.5" Visibility="Hidden"
+                                />
+                </Grid>
+
+                <!-- TRASH -->
+                <Grid Grid.Row="1" Margin="0,20">
+                    <Image x:Name="IconDelete" Height="22" Cursor="Hand"
+           Source="/Assets/TrangChinh/Light/trash_light.png"
+                           MouseLeftButtonDown="IconDelete_MouseLeftButtonDown"/>
+                    <Rectangle x:Name="SelTrash" Width="5" Height="22" Fill="#111"
+               HorizontalAlignment="Left" VerticalAlignment="Center"
+               RadiusX="1.5" RadiusY="1.5" Visibility="Collapsed"/>
+                </Grid>
+
+                <!-- PLUS -->
+                <Image x:Name="IconPlus" Grid.Row="2" Height="22" Margin="0,20,0,20" HorizontalAlignment="Center"
+         Source="/assets/TrangChinh/Light/plus_light.png"
+         Cursor="Hand"
+                       
+                       MouseLeftButtonDown="IconPlus_MouseLeftButtonDown"/>
+            </Grid>
+
+            <Button Grid.Row="2" Background="{StaticResource SidebarBg}" BorderThickness="0" Click="Click_Logout">
+                <Image x:Name="IconLogout"  Height="22" Margin="0,18" Source="/assets/TrangChinh/Light/Logout_light.png" HorizontalAlignment="Center" Cursor="Hand"/>
+            </Button>
+        </Grid>
+
+        <Grid Grid.Column="1" Margin="24,0,28,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="72"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!--Header-->
+            <Grid Grid.Row="0" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="42"/>
+                    <!-- back -->
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="48"/>
+                </Grid.ColumnDefinitions>
+
+                <!--Back Button-->
+                <Button x:Name="BtnBack" Grid.Column="0" Width="40" Height="40" Background="Transparent" BorderBrush="{DynamicResource FieldBorder}" BorderThickness="1" Visibility="Visible" ToolTip="Trở về"
+                        Click="BtnBack_Click">
+                    <Image x:Name="IconBack" Width="18" Source="/assets/TrangChinh/Light/Back_light.png"/>
+                </Button>
+
+
+                <!-- Search -->
+                <Border CornerRadius="10" Background="{DynamicResource FieldBg}" BorderBrush="{DynamicResource FieldBorder}" BorderThickness="1" Height="40" VerticalAlignment="Center" Margin="6,0,0,0" Grid.Column="1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="26"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Image x:Name="IconSearch" Grid.Column="0" Source="/assets/TrangChinh/Light/search_light.png" Width="16" Margin="6,0" Opacity="0.6"/>
+                        <TextBox x:Name="TxtSearch" Grid.Column="1" 
+                                 TextChanged="TxtSearch_TextChanged"
+                                 BorderThickness="0" Background="Transparent" Foreground="{DynamicResource TextMain}" FontSize="14" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}" Tag="Tìm kiếm ghi chú..."/>
+                    </Grid>
+                </Border>
+
+                <!-- Theme -->
+                <Button Grid.Column="2" x:Name="BtnTheme" Width="40" Height="40" Margin="16,0,0,0" Background="Transparent" BorderThickness="0" BorderBrush="{x:Null}"  ToolTip="Chuyển Light/Dark">
+                    <Image x:Name="ImgTheme" Source="/assets/TrangChinh/Light/Dark.png" Width="18"/>
+                </Button>
+            </Grid>
+
+            <!-- Greeting -->
+            <StackPanel x:Name="GreetingBar" Grid.Row="1" Margin="6,8,0,16">
+                <TextBlock x:Name="TxtHello" FontSize="28" FontWeight="Black" />
+                <TextBlock Text="Tất cả ghi chú của bạn đều ở trong trang này"
+                           Foreground="{DynamicResource TextSub}" Margin="0,6,0,0"/>
+            </StackPanel>
+
+            <!-- LIST LAYER + DROP ZONE OVERLAY -->
+            <Grid Grid.Row="2">
+                <ScrollViewer x:Name="ListLayer" VerticalScrollBarVisibility="Auto">
+                    <ListBox x:Name="NotesItems" 
+                     ItemTemplate="{StaticResource NoteCardTemplate}" 
+                     BorderThickness="0"
+                     Background="Transparent"
+                     SelectionMode="Single"
+                     VirtualizingStackPanel.IsVirtualizing="False"
+                     VirtualizingStackPanel.VirtualizationMode="Standard"
+                    >
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="4"/>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+
+                        <!-- Bỏ chọn mặc định (nếu không muốn màu xanh khi click) -->
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListBoxItem_PreviewMouseLeftButtonDown"/>
+                                <EventSetter Event="PreviewMouseLeftButtonUp" Handler="ListBoxItem_PreviewMouseLeftButtonUp"/>
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+                                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <ContentPresenter/>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
+                </ScrollViewer>
+
+                <!-- Kéo xóa -->
+                <Grid x:Name="DropZone" Height="180" VerticalAlignment="Bottom"
+      Visibility="Collapsed" Panel.ZIndex="40" Margin="-50">
+                    <Grid.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#00FFFFFF" Offset="0"/>
+                            <GradientStop Color="#FFFFFFFF" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Grid.Background>
+
+                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5"
+                           AllowDrop="True" DragEnter="DropZoneCenter_DragEnter"
+                            DragLeave="DropZoneCenter_DragLeave"
+                            Drop="DropZoneCenter_Drop">
+                        <Ellipse x:Name="DropZoneHalo" Width="440" Height="220" Fill="{StaticResource DropHaloBrush}"
+             Opacity="0" IsHitTestVisible="False">
+                            <Ellipse.RenderTransform>
+                                <ScaleTransform x:Name="DropHaloScale" ScaleX="0.95" ScaleY="0.95"/>
+                            </Ellipse.RenderTransform>
+                        </Ellipse>
+
+                        <!-- Nội dung -->
+                        <StackPanel x:Name="DropZoneCenter" Orientation="Vertical" 
+                                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <StackPanel.RenderTransform>
+                                <ScaleTransform x:Name="DropZoneScale" ScaleX="1" ScaleY="1"/>
+                            </StackPanel.RenderTransform>
+                            <Image x:Name="DropTrashIcon" Width="42" Height="42" Opacity="0.75"
+             Source="/Assets/TrangChinh/Light/trash_light.png"/>
+                            <TextBlock Text="Drag to Delete Note" Margin="0,8,0,0"
+                 FontWeight="SemiBold" Foreground="#FFEF4444"
+                 HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+
+                <!-- Kéo góc: xóa vĩnh viễn / phục hồi -->
+                <!-- Góc dưới: Delete permanently (trái) & Restore (phải) – style giống DropZone -->
+                <Grid x:Name="CornerZones" Visibility="Collapsed" Panel.ZIndex="41">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- LEFT: Delete permanently -->
+                    <Grid Grid.Column="0" HorizontalAlignment="Left"  VerticalAlignment="Bottom"
+                        Margin="36,0,0,24" RenderTransformOrigin="0.5,0.5"
+                        AllowDrop="True" DragEnter="CornerDeleteHotArea_DragEnter"
+                        DragLeave="CornerDeleteHotArea_DragLeave"
+                        Drop="CornerDeleteHotArea_Drop">
+                        <Ellipse x:Name="CornerDeleteHalo" Width="420" Height="210"
+             Fill="{StaticResource CornerDeleteHaloBrush}"
+             Opacity="0" IsHitTestVisible="False">
+                            <Ellipse.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform x:Name="CornerDeleteHaloScale" ScaleX="0.95" ScaleY="0.95"/>
+                                    <TranslateTransform x:Name="CornerDeleteHaloShift" X="-50" Y="150"/>
+                                </TransformGroup>
+                            </Ellipse.RenderTransform>
+                        </Ellipse>
+
+                        <!-- Nội dung: icon trên - chữ dưới (hit-test ở stack này) -->
+                        <StackPanel x:Name="CornerDeleteHotArea" Orientation="Vertical"
+                                    HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                            <StackPanel.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform x:Name="CornerDeleteScale" ScaleX="1" ScaleY="1"/>
+                                    <TranslateTransform x:Name="CornerDeleteShift" X="130" Y="20"/>
+                                </TransformGroup>
+                            </StackPanel.RenderTransform>
+
+                            <Image x:Name="CornerDeleteIcon" Width="28" Height="28"
+             Source="/Assets/TrangChinh/Light/trash_light.png" Opacity="0.85"
+             HorizontalAlignment="Center"/>
+                            <TextBlock Text="Xóa vĩnh viễn" Margin="0,8,0,0"
+                 FontWeight="SemiBold" Foreground="#EF4444"
+                 HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- RIGHT: Restore -->
+                    <Grid Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                    Margin="0,0,36,24" RenderTransformOrigin="0.5,0.5"
+                    DragEnter="CornerRestoreHotArea_DragEnter"
+                    DragLeave="CornerRestoreHotArea_DragLeave"
+                    Drop="CornerRestoreHotArea_Drop">
+                        <Ellipse x:Name="CornerRestoreHalo" Width="420" Height="210"
+             Fill="{StaticResource CornerRestoreHaloBrush}"
+             Opacity="0" IsHitTestVisible="False">
+                            <Ellipse.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform x:Name="CornerRestoreHaloScale" ScaleX="0.95" ScaleY="0.95"/>
+                                    <TranslateTransform x:Name="CornerRestoreHaloShift" X="20" Y="150"/>
+                                </TransformGroup>
+                            </Ellipse.RenderTransform>
+                        </Ellipse>
+
+                        <StackPanel x:Name="CornerRestoreHotArea" Orientation="Vertical"
+                HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                            <StackPanel.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform x:Name="CornerRestoreScale" ScaleX="1" ScaleY="1"/>
+                                    <TranslateTransform x:Name="CornerRestoreShift" X="-130" Y="20"/>
+                                </TransformGroup>
+                            </StackPanel.RenderTransform>
+
+                            <Image x:Name="CornerRestoreIcon" Width="28" Height="28"
+             Source="/assets/TrangChinh/Light/home_light.png" Opacity="0.85"
+             HorizontalAlignment="Center"/>
+                            <TextBlock Text="Khôi phục về ghi chú" Margin="0,8,0,0"
+                                    FontWeight="SemiBold" Foreground="#10B981"
+                                    HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+
+
+            </Grid>
+
+            <!-- DETAIL LAYER -->
+            <Grid x:Name="DetailLayer" Grid.Row="1" Grid.RowSpan="3" Visibility="Collapsed">
+                <Border x:Name="DetailBg"/>
+                <ScrollViewer Margin="0,20,0,0" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="80,20,60,60">
+                        <TextBox x:Name="DetailTitleBox" FontSize="28" FontWeight="Bold" Background="Transparent" BorderThickness="0"
+                                 TextChanged="DetailTitleBox_DataContextChanged"/>
+                        <TextBox x:Name="DetailContentBox" 
+                                 Margin="0,18,0,0" 
+                                 FontSize="16" 
+                                 AcceptsReturn="True" 
+                                 TextWrapping="Wrap" 
+                                 Background="Transparent" 
+                                 BorderThickness="0" 
+                                 VerticalScrollBarVisibility="Hidden"
+                                 TextChanged="DetailContentBox_DataContextChanged"/>
+                        <TextBlock x:Name="SaveStatusText" Foreground="Gray" FontSize="12"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+        <Canvas x:Name="DragCanvas"
+        Grid.ColumnSpan="2"
+        Panel.ZIndex="9999"
+        Background="Transparent" Visibility="Collapsed"/>
+        
+        
+    </Grid>
+
+</Window>
