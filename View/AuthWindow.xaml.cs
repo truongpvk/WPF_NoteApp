@@ -140,6 +140,10 @@ namespace DoAnNote
 
                 var alias = string.IsNullOrWhiteSpace(displayName) ? user : displayName;
                 var notesWindow = new Notes(alias);
+
+                MessageBox.Show($"Xin chào, {alias}!\nĐăng nhập thành công.", "NOTE.me",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+
                 notesWindow.Show();
                 this.Close();
             }

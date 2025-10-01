@@ -68,6 +68,7 @@ namespace DoAnNote
             ListLayer.Visibility = Visibility.Visible;
             GreetingBar.Visibility = Visibility.Visible;
             DetailLayer.Visibility = Visibility.Collapsed;
+            OpenPopupBtn.Visibility = Visibility.Collapsed;
 
 
             if (_isTrashPage)
@@ -360,6 +361,7 @@ namespace DoAnNote
             ListLayer.Visibility = Visibility.Visible;
             GreetingBar.Visibility = Visibility.Visible;
             DetailLayer.Visibility = Visibility.Collapsed;
+            OpenPopupBtn.Visibility = Visibility.Collapsed;
 
             AppSession.IsOnNote = false;
 
@@ -376,6 +378,8 @@ namespace DoAnNote
             ListLayer.Visibility = Visibility.Visible;
             GreetingBar.Visibility = Visibility.Visible;
             DetailLayer.Visibility = Visibility.Collapsed;
+            OpenPopupBtn.Visibility = Visibility.Collapsed;
+
 
             if (AppSession.UserId >= 0 && trash.Count == 0)
                 loadNote();
@@ -522,7 +526,7 @@ namespace DoAnNote
             UILoad();
         }
 
-        private void ListBoxItem_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private async void ListBoxItem_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (!_isDragging)
             {
@@ -539,6 +543,12 @@ namespace DoAnNote
                 ListLayer.Visibility = Visibility.Collapsed;
                 GreetingBar.Visibility = Visibility.Collapsed;
                 DetailLayer.Visibility = Visibility.Visible;
+                OpenPopupBtn.Visibility = Visibility.Visible;
+
+                await AppSession.OnNote.InitializeAsync();
+                SummarizeTxt.Text = AppSession.OnNote.SummarizeString;
+
+                
             }
         }
 
@@ -564,6 +574,17 @@ namespace DoAnNote
             }
 
             notesView.Refresh();
+        }
+
+        private void OpenPopupBtn_Click(object sender, RoutedEventArgs e)
+        {
+            MyPopup.IsOpen = true;
+            
+        }
+
+        private void ClosePopupBtn_Click(object sender, RoutedEventArgs e)
+        {
+            MyPopup.IsOpen = false;
         }
     }
 }
